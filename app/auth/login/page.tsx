@@ -17,6 +17,14 @@ export default function LoginPage() {
   async function login(emailAddress: string, destination: string, demoRole?: string) {
     setError('')
     if (demoRole) setDemoLoading(demoRole); else setLoading(true)
+    if (demoRole) {
+      const setupResponse = await fetch('/api/demo-accounts', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ role: demoRole }) })
+      if (!setupResponse.ok) {
+        setLoading(false); setDemoLoading('')
+        setError('ডেমো অ্যাকাউন্ট তৈরি করা যায়নি। Supabase সেটআপ যাচাই করুন')
+        return
+      }
+    }
     const { error: signInError } = await createClient().auth.signInWithPassword({ email: emailAddress, password: demoRole ? 'Demo1234!' : password })
     setLoading(false); setDemoLoading('')
     if (signInError) { setError(signInError.message.toLowerCase().includes('confirm') ? 'ইমেইল কনফার্ম করুন' : 'ডেমো অ্যাকাউন্ট আগে import করুন অথবা ইমেইল/পাসওয়ার্ড যাচাই করুন'); return }
