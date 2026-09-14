@@ -23,16 +23,13 @@ export async function POST(request: Request) {
 
   let user = users.users.find((candidate) => candidate.email?.toLowerCase() === account.email)
   if (!user) {
-    const result = await supabase.auth.admin.createUser({ email: account.email, password: DEMO_PASSWORD, email_confirm: true, user_metadata: { full_name: account.full_name } })
+    const result = await supabase.auth.admin.createUser({ email: account.email, password: DEMO_PASSWORD, email_confirm: true, user_metadata: { full_name: account.full_name }, app_metadata: { role: account.role } })
     if (result.error || !result.data.user) return NextResponse.json({ error: 'Could not create demo account.' }, { status: 500 })
     user = result.data.user
   } else {
-    const { error } = await supabase.auth.admin.updateUserById(user.id, { password: DEMO_PASSWORD, email_confirm: true, user_metadata: { full_name: account.full_name } })
+    const { error } = await supabase.auth.admin.updateUserById(user.id, { password: DEMO_PASSWORD, email_confirm: true, user_metadata: { full_name: account.full_name }, app_metadata: { role: account.role } })
     if (error) return NextResponse.json({ error: 'Could not refresh demo account.' }, { status: 500 })
   }
-
-  const { error: profileError } = await supabase.from('profiles').upsert({ id: user.id, role: account.role, full_name: account.full_name, is_instructor: account.is_instructor, is_blocked: false }, { onConflict: 'id' })
-  if (profileError) return NextResponse.json({ error: 'Could not prepare demo profile.' }, { status: 500 })
 
   return NextResponse.json({ email: account.email })
 }
