@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import DashboardContent from './dashboard-content'
+import InstructorDashboard from '@/app/instructor/instructor-content'
 
 export default async function DashboardPage() {
   const supabase = await createClient()
@@ -10,5 +11,6 @@ export default async function DashboardPage() {
   if (profile?.is_blocked) redirect('/auth/login?blocked=1')
   const role = profile?.role ?? user.app_metadata?.role
   if (!role || !['admin', 'instructor'].includes(role)) redirect('/student')
+  if (role === 'instructor') return <InstructorDashboard profile={{ fullName: profile?.full_name || user.user_metadata?.full_name || 'Instructor', avatarUrl: profile?.avatar_url || user.user_metadata?.avatar_url || '', email: user.email || '' }} />
   return <DashboardContent />
 }
