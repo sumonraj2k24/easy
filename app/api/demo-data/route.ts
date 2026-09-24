@@ -1,3 +1,4 @@
+import { revalidatePath } from 'next/cache'
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
@@ -85,5 +86,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Courses imported, but site settings could not be imported.' }, { status: 500 })
   }
 
+  revalidatePath('/')
+  revalidatePath('/dashboard')
   return NextResponse.json({ imported: demoCourses.length })
 }
